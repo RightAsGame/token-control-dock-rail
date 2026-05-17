@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate module version
+        run: |
+          VERSION="$(node -p "require('./module.json').version")"
+          TAG="${GITHUB_REF_NAME#v}"
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "module.json version $VERSION does not match tag $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+      - name: Build Foundry package
+        run: |
+          mkdir -p release/token-control-dock
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitattributes' \
+            --exclude='.gitignore' \
+            --exclude='release' \
+            --exclude='dist' \
+            --exclude='*.zip' \
+            ./ release/token-control-dock/
+          cd release
+          zip -r module.zip token-control-dock
+          cp ../module.json module.json
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/module.json
+            release/module.zip

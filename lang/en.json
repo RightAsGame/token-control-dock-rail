@@ -1,0 +1,16 @@
+{
+  "TOKEN_CONTROL_DOCK.Settings.ShowDock.Name": "Token Control Dock | Show Dock",
+  "TOKEN_CONTROL_DOCK.Settings.ShowDock.Hint": "Show the Token Control Dock when tokens are selected.",
+  "TOKEN_CONTROL_DOCK.Settings.ShowHeader.Name": "Token Control Dock | Show Header",
+  "TOKEN_CONTROL_DOCK.Settings.ShowHeader.Hint": "Show the dock header and selected-token count.",
+  "TOKEN_CONTROL_DOCK.Settings.CompactMode.Name": "Token Control Dock | Compact Mode",
+  "TOKEN_CONTROL_DOCK.Settings.CompactMode.Hint": "Use smaller controls.",
+  "TOKEN_CONTROL_DOCK.Settings.PositionMode.Name": "Token Control Dock | Position Mode",
+  "TOKEN_CONTROL_DOCK.Settings.PositionMode.Hint": "Choose where the Token Control Dock should appear.",
+  "TOKEN_CONTROL_DOCK.Settings.PositionMode.SceneControls": "Beside Scene Controls",
+  "TOKEN_CONTROL_DOCK.Settings.PositionMode.FallbackLeft": "Fallback Left",
+  "TOKEN_CONTROL_DOCK.Ui.Title": "Token Controls",
+  "TOKEN_CONTROL_DOCK.Ui.SelectedCount": "{count} selected",
+  "TOKEN_CONTROL_DOCK.Ui.ActionFailed": "Token Control Dock action failed. See the console for details.",
+  "TOKEN_CONTROL_DOCK.SceneControl.Title": "Token Control Dock"
+}

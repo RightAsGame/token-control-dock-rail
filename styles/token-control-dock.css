@@ -1,0 +1,145 @@
+#token-control-dock.token-control-dock {
+  --tcd-left: 72px;
+  --tcd-top: 120px;
+  --tcd-control-size: 32px;
+  --tcd-gap: 4px;
+  --tcd-marker: rgba(255, 255, 255, 0.95);
+  --tcd-button-bg: rgba(20, 20, 20, 0.72);
+  --tcd-button-border: rgba(255, 255, 255, 0.28);
+  --tcd-button-hover: rgba(35, 35, 35, 0.88);
+  --tcd-text: #f2f2f2;
+  --tcd-active: #d6b96d;
+
+  position: fixed;
+  left: var(--tcd-left);
+  top: var(--tcd-top);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--tcd-gap);
+  max-width: min(520px, calc(100vw - var(--tcd-left) - 16px));
+  color: var(--tcd-text);
+  pointer-events: none;
+}
+
+#token-control-dock.tcd-hidden {
+  display: none;
+}
+
+#token-control-dock .tcd-header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+#token-control-dock .tcd-marker {
+  width: calc(var(--tcd-control-size) + 10px);
+  height: 3px;
+  margin-left: 1px;
+  background: var(--tcd-marker);
+  border-radius: 999px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+}
+
+#token-control-dock .tcd-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tcd-gap);
+  max-width: inherit;
+  overflow: visible;
+  pointer-events: none;
+}
+
+#token-control-dock .tcd-group {
+  display: flex;
+  min-width: 0;
+}
+
+#token-control-dock .tcd-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tcd-gap);
+  max-width: inherit;
+}
+
+#token-control-dock .tcd-control,
+#token-control-dock .tcd-component {
+  pointer-events: auto;
+}
+
+#token-control-dock .tcd-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 var(--tcd-control-size);
+  width: var(--tcd-control-size);
+  height: var(--tcd-control-size);
+  min-width: var(--tcd-control-size);
+  min-height: var(--tcd-control-size);
+  padding: 0;
+  color: var(--tcd-text);
+  background: var(--tcd-button-bg);
+  border: 1px solid var(--tcd-button-border);
+  border-radius: 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#token-control-dock .tcd-button:hover:not(:disabled),
+#token-control-dock .tcd-button:focus-visible:not(:disabled) {
+  background: var(--tcd-button-hover);
+  outline: 2px solid var(--tcd-marker);
+  outline-offset: 1px;
+}
+
+#token-control-dock .tcd-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+#token-control-dock .tcd-button.tcd-active,
+#token-control-dock .tcd-button[aria-pressed="true"] {
+  color: #111;
+  background: var(--tcd-active);
+  border-color: var(--tcd-active);
+}
+
+#token-control-dock .tcd-icon {
+  width: 1em;
+  text-align: center;
+}
+
+#token-control-dock .tcd-label {
+  max-width: calc(var(--tcd-control-size) - 4px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+#token-control-dock .tcd-button.tcd-has-icon .tcd-label {
+  display: none;
+}
+
+#token-control-dock.tcd-compact {
+  --tcd-control-size: 28px;
+  --tcd-gap: 3px;
+}
+
+body.theme-light #token-control-dock.token-control-dock,
+body.light #token-control-dock.token-control-dock {
+  --tcd-button-bg: rgba(25, 24, 19, 0.68);
+  --tcd-button-border: rgba(255, 255, 255, 0.32);
+  --tcd-button-hover: rgba(25, 24, 19, 0.84);
+  --tcd-text: #f2f2f2;
+}
