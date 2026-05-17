@@ -9,8 +9,13 @@ const DEFAULT_TOP_ROW_HEIGHT = 40;
 const SCENE_CONTROLS_GAP = 6;
 const RAIL_SEARCH_WIDTH = 160;
 
+let activeDock = null;
+
+registerNativeSceneControlAnchor();
+
 export class TokenControlDock {
   constructor({ registry, createContext }) {
+    activeDock = this;
     this.registry = registry;
     this.createContext = createContext;
     this.element = null;
@@ -26,27 +31,6 @@ export class TokenControlDock {
     this.reposition = this.reposition.bind(this);
     this.onPotentialSelectionChange = this.onPotentialSelectionChange.bind(this);
     this.onAnchorClick = this.onAnchorClick.bind(this);
-    this.registerSceneControlAnchor();
-  }
-
-  registerSceneControlAnchor() {
-    Hooks.on("getSceneControlButtons", (controls) => {
-      const tokens = controls?.tokens;
-      if (!tokens) return;
-
-      tokens.tools ??= {};
-      tokens.tools[SCENE_CONTROL_ANCHOR_ID] = {
-        name: SCENE_CONTROL_ANCHOR_ID,
-        title: "TOKEN_CONTROL_DOCK.SceneControl.Title",
-        icon: "fa-solid fa-grip-lines",
-        button: true,
-        order: 999,
-        onChange: () => {
-          this.reposition();
-          this.refresh("sceneControlAnchor");
-        }
-      };
-    });
   }
 
   initialize() {
@@ -78,6 +62,7 @@ export class TokenControlDock {
     this.count = null;
     this.visible = false;
     this.initialized = false;
+    if (activeDock === this) activeDock = null;
   }
 
   reposition() {
@@ -455,6 +440,26 @@ export class TokenControlDock {
     this.anchorElement = anchor;
     this.anchorElement.classList.toggle("active", this.visible);
   }
+}
+
+function registerNativeSceneControlAnchor() {
+  Hooks.on("getSceneControlButtons", (controls) => {
+    const tokens = controls?.tokens;
+    if (!tokens) return;
+
+    tokens.tools ??= {};
+    tokens.tools[SCENE_CONTROL_ANCHOR_ID] = {
+      name: SCENE_CONTROL_ANCHOR_ID,
+      title: "TOKEN_CONTROL_DOCK.SceneControl.Title",
+      icon: "fa-solid fa-grip-lines",
+      button: true,
+      order: 999,
+      onChange: () => {
+        activeDock?.reposition();
+        activeDock?.refresh("sceneControlAnchor");
+      }
+    };
+  });
 }
 
 function findSceneControlsElement() {
