@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+- Restricted the rail experiment to Foundry native Scene Controls anchoring.
+- Removed the manual DOM-created fallback anchor.
+- Added visible diagnostics for Scene Controls hook registration.
+
 ## 0.1.4
 
 - Reworked the dock from a floating panel into a Scene Controls rail attachment.

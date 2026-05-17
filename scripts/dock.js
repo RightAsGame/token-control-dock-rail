@@ -413,7 +413,8 @@ function registerNativeSceneControlAnchor() {
       title: "TOKEN_CONTROL_DOCK.SceneControl.Title",
       icon: "fa-solid fa-grip-lines",
       button: true,
-      order: 999,
+      visible: true,
+      order: Object.keys(tokens.tools).length,
       onChange: () => {
         activeDock?.reposition();
         activeDock?.refresh("sceneControlAnchor");

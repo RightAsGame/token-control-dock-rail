@@ -1,5 +1,5 @@
 export const MODULE_ID = "token-control-dock";
-export const VERSION = "0.1.4";
+export const VERSION = "0.1.5";
 export const SCENE_CONTROL_ANCHOR_ID = "token-control-dock";
 
 export const HOOKS = {
