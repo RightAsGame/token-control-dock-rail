@@ -427,8 +427,9 @@ export class TokenControlDock {
       return;
     }
 
-    const tokenAnchor = findTokenControlAnchor(sceneControls, sceneControls.getBoundingClientRect());
-    const fallbackParent = findRailInsertionParent(sceneControls, tokenAnchor);
+    const tokenTools = findTokenToolAnchors(sceneControls, sceneControls.getBoundingClientRect());
+    const insertionAnchor = tokenTools.at(-1) ?? findTokenControlAnchor(sceneControls, sceneControls.getBoundingClientRect());
+    const fallbackParent = findRailInsertionParent(sceneControls, insertionAnchor);
     const anchor = createElement("button", {
       id: ANCHOR_ID,
       className: "scene-control tcd-scene-anchor",
@@ -445,8 +446,8 @@ export class TokenControlDock {
     }));
     anchor.addEventListener("click", this.onAnchorClick);
 
-    if (tokenAnchor?.parentElement) {
-      tokenAnchor.insertAdjacentElement("afterend", anchor);
+    if (insertionAnchor?.parentElement) {
+      insertionAnchor.insertAdjacentElement("afterend", anchor);
     } else {
       fallbackParent.append(anchor);
     }
@@ -526,6 +527,31 @@ function findTokenControlAnchor(sceneControls, rect) {
     .sort((a, b) => b.score - a.score || a.rect.top - b.rect.top || a.rect.left - b.rect.left);
 
   return candidates[0]?.element ?? null;
+}
+
+function findTokenToolAnchors(sceneControls, rect) {
+  const layerAnchor = findTokenControlAnchor(sceneControls, rect);
+  const layerRect = layerAnchor?.getBoundingClientRect();
+  const rawCandidates = getRailControlCandidates(sceneControls, rect)
+    .filter(({ element }) => element !== layerAnchor && !element.closest(`#${ANCHOR_ID}`))
+    .filter(({ rect: candidateRect }) => {
+      if (!layerRect) return true;
+      const isToolColumn = candidateRect.left > layerRect.left + 8;
+      const isNearTokenTools = candidateRect.top >= layerRect.top - 8
+        && candidateRect.top <= layerRect.top + 220;
+      return isToolColumn && isNearTokenTools;
+    });
+
+  const toolColumnLeft = rawCandidates.reduce((left, { rect: candidateRect }) => {
+    if (left === null) return candidateRect.left;
+    return Math.min(left, candidateRect.left);
+  }, null);
+
+  const candidates = rawCandidates
+    .filter(({ rect: candidateRect }) => toolColumnLeft === null || Math.abs(candidateRect.left - toolColumnLeft) <= 12)
+    .sort((a, b) => a.rect.top - b.rect.top || a.rect.left - b.rect.left);
+
+  return candidates.map(({ element }) => element);
 }
 
 function findRailInsertionParent(sceneControls, tokenAnchor) {
