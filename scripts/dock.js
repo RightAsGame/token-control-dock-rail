@@ -576,7 +576,7 @@ function scoreRailAnchor(element, text, patterns) {
 
 function debugSceneControls(label, controls) {
   if (!DEBUG) return;
-  console.debug(`Token Control Dock | ${label}`, {
+  console.warn(`Token Control Dock | ${label}`, {
     controlKeys: Object.keys(controls ?? {}),
     tokenToolKeys: Object.keys(controls?.tokens?.tools ?? {})
   });
