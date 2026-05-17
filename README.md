@@ -27,7 +27,7 @@ The module does not provide built-in token action buttons. Other modules, or con
 
 Token Control Dock is a shared anchor for other modules. The dock button itself is the native Scene Controls tool with the grip-lines icon; buttons beneath it are registered by dependent modules.
 
-![Illustration of Token Control Dock with example module buttons](docs/images/token-control-dock-example.png)
+![Token Control Dock with example module buttons](docs/images/token-control-dock-example.png)
 
 In the example above, the stacked buttons are provided by separate modules:
 
