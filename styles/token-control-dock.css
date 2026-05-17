@@ -143,3 +143,31 @@ body.light #token-control-dock.token-control-dock {
   --tcd-button-hover: rgba(25, 24, 19, 0.84);
   --tcd-text: #f2f2f2;
 }
+
+#token-control-dock-scene-control-anchor.tcd-scene-anchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(20, 20, 20, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  box-shadow: none;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#token-control-dock-scene-control-anchor.tcd-scene-anchor:hover,
+#token-control-dock-scene-control-anchor.tcd-scene-anchor.active {
+  color: #111;
+  background: var(--tcd-active, #d6b96d);
+  border-color: var(--tcd-active, #d6b96d);
+}

@@ -3,6 +3,7 @@ import { errorForControl, warnOnce } from "./logger.js";
 import { createElement, debounce, emptyElement, getSetting, localize } from "./util.js";
 
 const DOCK_ID = "token-control-dock";
+const ANCHOR_ID = "token-control-dock-scene-control-anchor";
 const FALLBACK_POSITION = { left: 72, top: 120 };
 const DEFAULT_TOP_ROW_HEIGHT = 40;
 const SCENE_CONTROLS_GAP = 6;
@@ -13,6 +14,7 @@ export class TokenControlDock {
     this.registry = registry;
     this.createContext = createContext;
     this.element = null;
+    this.anchorElement = null;
     this.body = null;
     this.header = null;
     this.marker = null;
@@ -23,6 +25,7 @@ export class TokenControlDock {
     this.refresh = debounce((reason = "refresh") => this.#render(reason));
     this.reposition = this.reposition.bind(this);
     this.onPotentialSelectionChange = this.onPotentialSelectionChange.bind(this);
+    this.onAnchorClick = this.onAnchorClick.bind(this);
     this.registerSceneControlAnchor();
   }
 
@@ -66,7 +69,9 @@ export class TokenControlDock {
     document.removeEventListener("pointerup", this.onPotentialSelectionChange, true);
     document.removeEventListener("keyup", this.onPotentialSelectionChange, true);
     this.element?.remove();
+    this.anchorElement?.remove();
     this.element = null;
+    this.anchorElement = null;
     this.body = null;
     this.header = null;
     this.marker = null;
@@ -91,8 +96,10 @@ export class TokenControlDock {
       return;
     }
 
+    this.#ensureAnchorElement(sceneControls);
+
     const rect = sceneControls.getBoundingClientRect();
-    const position = getDockPosition(sceneControls, rect);
+    const position = getDockPosition(sceneControls, rect, this.anchorElement);
     const left = Math.max(0, Math.round(position.left));
     const top = Math.max(0, Math.round(position.top));
 
@@ -102,6 +109,13 @@ export class TokenControlDock {
   onPotentialSelectionChange(event) {
     if (event?.target instanceof Node && this.element?.contains(event.target)) return;
     window.setTimeout(() => this.#refreshSelection("interaction"), 0);
+  }
+
+  onAnchorClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.reposition();
+    this.refresh("anchorClicked");
   }
 
   #createElement() {
@@ -379,6 +393,7 @@ export class TokenControlDock {
     const wasVisible = this.visible;
     this.visible = true;
     this.element.classList.remove("tcd-hidden");
+    this.anchorElement?.classList.add("active");
     if (!wasVisible) this.element.classList.add("tcd-visible");
   }
 
@@ -386,6 +401,7 @@ export class TokenControlDock {
     this.visible = false;
     this.element?.classList.add("tcd-hidden");
     this.element?.classList.remove("tcd-visible");
+    this.anchorElement?.classList.remove("active");
   }
 
   #applySettingsClasses() {
@@ -396,6 +412,47 @@ export class TokenControlDock {
   #applyPosition(left, top) {
     this.element.style.setProperty("--tcd-left", `${left}px`);
     this.element.style.setProperty("--tcd-top", `${top}px`);
+  }
+
+  #ensureAnchorElement(sceneControls) {
+    const nativeAnchor = findDockSceneControlAnchor(sceneControls);
+    if (nativeAnchor) {
+      this.anchorElement = nativeAnchor;
+      this.anchorElement.classList.toggle("active", this.visible);
+      return;
+    }
+
+    if (this.anchorElement?.isConnected && sceneControls.contains(this.anchorElement)) {
+      this.anchorElement.classList.toggle("active", this.visible);
+      return;
+    }
+
+    const tokenAnchor = findTokenControlAnchor(sceneControls, sceneControls.getBoundingClientRect());
+    const fallbackParent = findRailInsertionParent(sceneControls, tokenAnchor);
+    const anchor = createElement("button", {
+      id: ANCHOR_ID,
+      className: "scene-control tcd-scene-anchor",
+      attributes: {
+        type: "button",
+        "data-tool": SCENE_CONTROL_ANCHOR_ID,
+        "aria-label": localize("TOKEN_CONTROL_DOCK.SceneControl.Title"),
+        title: localize("TOKEN_CONTROL_DOCK.SceneControl.Title")
+      }
+    });
+    anchor.append(createElement("i", {
+      className: "fa-solid fa-grip-lines",
+      attributes: { "aria-hidden": "true" }
+    }));
+    anchor.addEventListener("click", this.onAnchorClick);
+
+    if (tokenAnchor?.parentElement) {
+      tokenAnchor.insertAdjacentElement("afterend", anchor);
+    } else {
+      fallbackParent.append(anchor);
+    }
+
+    this.anchorElement = anchor;
+    this.anchorElement.classList.toggle("active", this.visible);
   }
 }
 
@@ -416,8 +473,8 @@ function findSceneControlsElement() {
   return null;
 }
 
-function getDockPosition(sceneControls, rect) {
-  const dockAnchor = findDockSceneControlAnchor(sceneControls);
+function getDockPosition(sceneControls, rect, knownAnchor = null) {
+  const dockAnchor = knownAnchor?.isConnected ? knownAnchor : findDockSceneControlAnchor(sceneControls);
   if (dockAnchor) {
     const anchorRect = dockAnchor.getBoundingClientRect();
     return {
@@ -437,6 +494,7 @@ function getDockPosition(sceneControls, rect) {
 
 function findDockSceneControlAnchor(sceneControls) {
   const selectors = [
+    `#${ANCHOR_ID}`,
     `[data-tool="${SCENE_CONTROL_ANCHOR_ID}"]`,
     `[data-control="${SCENE_CONTROL_ANCHOR_ID}"]`,
     `[data-action="${SCENE_CONTROL_ANCHOR_ID}"]`,
@@ -450,6 +508,41 @@ function findDockSceneControlAnchor(sceneControls) {
   }
 
   return null;
+}
+
+function findTokenControlAnchor(sceneControls, rect) {
+  const patterns = [
+    /(^|\b)(token|tokens)(\b|$)/i,
+    /token controls/i,
+    /select token/i
+  ];
+
+  const candidates = getRailControlCandidates(sceneControls, rect)
+    .map((candidate) => ({
+      ...candidate,
+      score: scoreRailAnchor(candidate.element, candidate.text, patterns)
+    }))
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.rect.top - b.rect.top || a.rect.left - b.rect.left);
+
+  return candidates[0]?.element ?? null;
+}
+
+function findRailInsertionParent(sceneControls, tokenAnchor) {
+  const parent = tokenAnchor?.parentElement;
+  if (parent instanceof HTMLElement) return parent;
+
+  const groups = Array.from(sceneControls.querySelectorAll("menu, ul, ol, nav, div"))
+    .filter((element) => element instanceof HTMLElement)
+    .map((element) => ({
+      element,
+      controls: Array.from(element.children).filter((child) => child instanceof HTMLElement
+        && child.getBoundingClientRect().width >= 24
+        && child.getBoundingClientRect().height >= 24).length
+    }))
+    .sort((a, b) => b.controls - a.controls);
+
+  return groups[0]?.element ?? sceneControls;
 }
 
 function getDockTop(sceneControls, rect, gap) {
