@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+
+- Stacked registered dock controls vertically under the dock anchor.
+- Kept component flyouts free to expand horizontally from each stacked trigger.
+
 ## 0.1.5
 
 - Restricted the rail experiment to Foundry native Scene Controls anchoring.
